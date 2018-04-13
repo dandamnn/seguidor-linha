@@ -1,7 +1,9 @@
 #include <AFMotor.h>
  
-AF_DCMotor motor_esq(1); //Seleciona o motor 1
-AF_DCMotor motor_dir(4); //Seleciona o motor 4
+AF_DCMotor motor_um(1); //Seleciona o motor 1
+AF_DCMotor motor_dois(2); //Seleciona o motor 4
+AF_DCMotor motor_tres(3); //Seleciona o motor 1
+AF_DCMotor motor_quatro(4); //Seleciona o motor 4
  
 int SENSOR1, SENSOR2, SENSOR3;
  
@@ -63,6 +65,17 @@ void vireDireita(){
   right = startSpeed + rotate;
 }
 
+void setVelocidadeMotores(){
+  motor_um.setSpeed(left);
+  motor_um.run(FORWARD);
+  motor_quatro.setSpeed(left);
+  motor_quatro.run(FORWARD);
+  motor_dois.setSpeed(right);
+  motor_dois.run(FORWARD);
+  motor_tres.setSpeed(right);
+  motor_tres.run(FORWARD);      
+}
+
 void loop()
 {
   //utiliza a mesma velocidade em ambos os motores
@@ -85,8 +98,6 @@ void loop()
   }
  
   //Envia os valores de velocidade para os motores
-  motor_esq.setSpeed(left);
-  motor_esq.run(FORWARD);
-  motor_dir.setSpeed(right);
-  motor_dir.run(FORWARD);
+  setVelocidadeMotores();
+  
 }
