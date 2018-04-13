@@ -12,7 +12,7 @@ int leftOffset = 0, rightOffset = 0, centre = 0;
 //pinos para a velocidade e direcao do motor
 int speed1 = 3, speed2 = 11, direction1 = 12, direction2 = 13;
 //velocidade inicial e deslocamento de rotacao
-int startSpeed = 70, rotate = 30;
+int startSpeed = 200, rotate = 50;
 //limiar do sensor
 int threshold = 5;
 //velocidades iniciais dos motores esquerdo e direito
@@ -65,6 +65,24 @@ void vireDireita(){
   right = startSpeed + rotate;
 }
 
+void vireEsquerdaParado(){
+  left = 0;
+  right = startSpeed + rotate;
+  setVelocidadeMotores();
+}
+
+void vireDireitaParado(){
+  left = startSpeed + rotate;
+  right = 0;
+  setVelocidadeMotores();
+}
+
+void seguirFrente(){
+  left = startSpeed;
+  right = startSpeed;
+  setVelocidadeMotores();
+}
+
 void setVelocidadeMotores(){
   motor_um.setSpeed(left);
   motor_um.run(FORWARD);
@@ -83,21 +101,22 @@ void loop()
   right = startSpeed;
  
   //le os sensores e adiciona os deslocamentos
-  lerSensores();
+ // lerSensores();
+  seguirFrente();
+  
+  delay(3000);
   
   //Se SENSOR1 for maior do que o sensor do centro + limiar,
   //vire para a direita
-  if (SENSOR1 > SENSOR2+threshold) {
-    vireEsquerda();  
-  }
- 
+  vireEsquerdaParado();
+  delay(3000);
+  
+  
   //Se SENSOR3 for maior do que o sensor do centro + limiar,
   //vire para a esquerda
-  if (SENSOR3 > (SENSOR2+threshold)){
-    vireDireita();
-  }
+    vireDireitaParado();
+  delay(3000);
  
-  //Envia os valores de velocidade para os motores
-  setVelocidadeMotores();
-  
+  //Envia os valores de velocidade para os motores  
 }
+
