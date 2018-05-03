@@ -11,18 +11,25 @@ AF_DCMotor motor_quatro(4); //Seleciona o motor 4
 int SENSOR_E, SENSOR_D;
 
 //velocidade inicial e deslocamento de rotacao
-int startSpeed = 30, rotate = 40;
+int startSpeed = 50, rotate = 40;
 //velocidades iniciais dos motores esquerdo e direito
 int left = startSpeed, right = startSpeed;
+//condição para seguir em frente
 boolean andar = true;
+//velocidades individuais de cada motor para andar em linha reta
 int motor1=50, motor2=50, motor3=70, motor4=70;
+//resistêcia maxima para cada sensor
 int limite_se = 130, limite_sd = 100; 
 
+//retorna true caso a resistência do sensor esquerdo seja menor
+//que a resistência maxima
 boolean isBlackLeft(){
   lerSensores();
   return SENSOR_E <= limite_se;  
 } 
 
+//retorna true caso a resistência do sensor direito seja menor
+//que a resistência maxima
 boolean isBlackRight(){
   lerSensores();
   return SENSOR_D <= limite_sd;
@@ -37,24 +44,28 @@ void lerSensores(){
   SENSOR_D = analogRead(PIN_SD);
 }
 
+//virar para a esquerda parando as rodas da esquerda
 void vireEsquerdaParado(){
   left = 0;
   right = startSpeed + rotate;
   setVelocidadeMotores();
 }
 
+//virar para a direita parando as rodas das direita
 void vireDireitaParado(){
   left = startSpeed + rotate;
   right = 0;
   setVelocidadeMotores();
 }
 
+//segue em frente
 void seguirFrente(){
   left = startSpeed;
   right = startSpeed;
   setVelocidadeAndar();
 }
 
+//velocidade dos motores quando estão rodando
 void setVelocidadeMotores(){
   motor_um.setSpeed(left);
   motor_um.run(FORWARD);
@@ -66,6 +77,7 @@ void setVelocidadeMotores(){
   motor_tres.run(FORWARD);      
 }
 
+//velocidade dos motores quando segue em linha reta
 void setVelocidadeAndar(){
   motor_um.setSpeed(motor1);
   motor_um.run(FORWARD);
@@ -77,6 +89,7 @@ void setVelocidadeAndar(){
   motor_tres.run(FORWARD);      
 }
 
+//zera a velocidade dos motores
 void setVelocidadeStop(){
   andar = false;
   motor_um.setSpeed(0);
@@ -90,34 +103,36 @@ void setVelocidadeStop(){
 }
 
 void loop(){
-  //utiliza a mesma velocidade em ambos os motores
+  //utiliza a mesma velocidade em ambos os motores para iniciar
   left = startSpeed;
   right = startSpeed;
   lerSensores();
-  
+  //caso o sensor direito esteja em cima da linha preta
   if(isBlackRight()){
     setVelocidadeStop();
+    //enquanto o sensor esquerdo não encontrar a linha preta
     while(!isBlackLeft()){
       vireEsquerdaParado();
     }
     andar=true;
     }
-    else if(andar){
+  else if(andar){
       seguirFrente();
     }
-    
- if(isBlackLeft()){
+  //caso o sensor esquerdo esteja em cima da linha preta  
+  if(isBlackLeft()){
     setVelocidadeStop();
+    //enquanto o sensor esquerdo não encontrar a linha preta
     while(!isBlackRight()){ 
       vireDireitaParado();
     }
     andar=true;
     }
-    else if(andar){
-      seguirFrente();
-    }  
- 
- if(isBlackRight() && isBlackLeft()){
+  else if(andar){
     seguirFrente();
-  } 
+    }  
+  //caso os dois sensores estejam em cima da linha preta
+  if(isBlackRight() && isBlackLeft()){
+    seguirFrente();
+  }   
 }
