@@ -116,4 +116,8 @@ void loop(){
     else if(andar){
       seguirFrente();
     }  
+ 
+ if(isBlackRight() && isBlackLeft()){
+    seguirFrente();
+  } 
 }
