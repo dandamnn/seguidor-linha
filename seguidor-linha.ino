@@ -1,79 +1,58 @@
 #include <AFMotor.h>
  
 AF_DCMotor motor_um(1); //Seleciona o motor 1
-AF_DCMotor motor_dois(2); //Seleciona o motor 4
-AF_DCMotor motor_tres(3); //Seleciona o motor 1
+AF_DCMotor motor_dois(2); //Seleciona o motor 2
+AF_DCMotor motor_tres(3); //Seleciona o motor 3
 AF_DCMotor motor_quatro(4); //Seleciona o motor 4
- 
-#define SENSORD A5
-#define SENSORE A4
 
-int SENSOR1, SENSOR3;
- 
-//deslocamentos de calibracao
-int leftOffset = 0, rightOffset = 0, centre = 0;
-//pinos para a velocidade e direcao do motor
-int speed1 = 3, speed2 = 11, direction1 = 12, direction2 = 13;
+#define PIN_SE A4
+#define PIN_SD A5
+
+int SENSOR_E, SENSOR_D;
+
 //velocidade inicial e deslocamento de rotacao
-int startSpeed = 200, rotate = 150;
-//limiar do sensor
-int threshold = 200, esq = 100, dir = 85;
+int startSpeed = 30, rotate = 40;
 //velocidades iniciais dos motores esquerdo e direito
 int left = startSpeed, right = startSpeed;
+boolean andar = true;
+int motor1=50, motor2=50, motor3=70, motor4=70;
+int limite_se = 130, limite_sd = 100; 
 
-//Rotina de calibracao do sensor
-void calibrate(){
- for (int x=0; x<10; x++) //Executa 10 vezes para obter uma media
- {
-   delay(100);
-   SENSOR1 = analogRead(SENSORD);
-   SENSOR3 = analogRead(SENSORE);
-   leftOffset = leftOffset + SENSOR1;
-   rightOffset = rightOffset + SENSOR3;
-   delay(100);
- }
- //obtem a media para cada sensor
- leftOffset = leftOffset /10;
- rightOffset = rightOffset /10;
- //calcula os deslocamentos para os sensores esquerdo e direito
- //leftOffset = centre - leftOffset;
- //rightOffset = centre - rightOffset;
+boolean isBlackLeft(){
+  lerSensores();
+  return SENSOR_E <= limite_se;  
+} 
+
+boolean isBlackRight(){
+  lerSensores();
+  return SENSOR_D <= limite_sd;
 }
- 
+  
 void setup(){
   Serial.begin(9600);
-  //calibrate();
-  Serial.print("Fora Temer");
-  delay(3000);
 }
 
 void lerSensores(){
-  SENSOR1 = analogRead(SENSORD) + leftOffset;
-  SENSOR3 = analogRead(SENSORE) + rightOffset;
+  SENSOR_E = analogRead(PIN_SE);
+  SENSOR_D = analogRead(PIN_SD);
 }
 
-//Essa função faz o robô virar a esquerda
-void vireEsquerda(){
-  Serial.print("esquerda");
-  left = startSpeed;
-  right = startSpeed - rotate;
+void vireEsquerdaParado(){
+  left = 0;
+  right = startSpeed + rotate;
   setVelocidadeMotores();
 }
 
-//Vira o robô para a direita
-void vireDireita(){
-  Serial.print("direita");
-  left = startSpeed - rotate;
-  right = startSpeed;
+void vireDireitaParado(){
+  left = startSpeed + rotate;
+  right = 0;
   setVelocidadeMotores();
 }
-
 
 void seguirFrente(){
-  Serial.print("frente");
   left = startSpeed;
   right = startSpeed;
-  setVelocidadeMotores();
+  setVelocidadeAndar();
 }
 
 void setVelocidadeMotores(){
@@ -87,30 +66,54 @@ void setVelocidadeMotores(){
   motor_tres.run(FORWARD);      
 }
 
-void loop(){
-  Serial.println(SENSOR1);
-  Serial.println(SENSOR3);
+void setVelocidadeAndar(){
+  motor_um.setSpeed(motor1);
+  motor_um.run(FORWARD);
+  motor_quatro.setSpeed(motor4);
+  motor_quatro.run(FORWARD);
+  motor_dois.setSpeed(motor2);
+  motor_dois.run(FORWARD);
+  motor_tres.setSpeed(motor3);
+  motor_tres.run(FORWARD);      
+}
 
+void setVelocidadeStop(){
+  andar = false;
+  motor_um.setSpeed(0);
+  motor_um.run(BACKWARD);
+  motor_quatro.setSpeed(0);
+  motor_quatro.run(BACKWARD);
+  motor_dois.setSpeed(0);
+  motor_dois.run(FORWARD);
+  motor_tres.setSpeed(0);
+  motor_tres.run(FORWARD);     
+}
+
+void loop(){
   //utiliza a mesma velocidade em ambos os motores
   left = startSpeed;
   right = startSpeed;
- 
-  //le os sensores e adiciona os deslocamentos
   lerSensores();
   
-  if(SENSOR1<dir){
-  //Se SENSOR1 for maior do que a constante,
-  //vire para a direita
-    vireDireita(); 
-  }
-  else if(SENSOR3<esq){
-  //Se SENSOR3 for maior do que a constante,
-  //vire para a esquerda
-    vireEsquerda();
-  }
-  else{
-    //Se não satisfazer a nenhuma das duas condiçoes,
-    //seguir em frente
-    seguirFrente();
-   }
+  if(isBlackRight()){
+    setVelocidadeStop();
+    while(!isBlackLeft()){
+      vireEsquerdaParado();
+    }
+    andar=true;
+    }
+    else if(andar){
+      seguirFrente();
+    }
+    
+ if(isBlackLeft()){
+    setVelocidadeStop();
+    while(!isBlackRight()){ 
+      vireDireitaParado();
+    }
+    andar=true;
+    }
+    else if(andar){
+      seguirFrente();
+    }  
 }
