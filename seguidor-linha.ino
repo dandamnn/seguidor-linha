@@ -111,25 +111,25 @@ void loop(){
   if(isBlackRight() && isBlackLeft()){
     seguirFrente();
   }
-    //caso o sensor direito esteja em cima da linha preta
-    else if(isBlackRight()){
-      setVelocidadeStop();
-      //enquanto o sensor esquerdo não encontrar a linha preta
-      while(!isBlackLeft()){
-        vireEsquerdaParado();
+  //caso o sensor direito esteja em cima da linha preta
+  else if(isBlackRight()){
+    setVelocidadeStop();
+   //enquanto o sensor esquerdo não encontrar a linha preta
+    while(!isBlackLeft()){
+      vireEsquerdaParado();
       }
-      andar=true;
+    andar=true;
+  }
+  //caso o sensor esquerdo esteja em cima da linha preta  
+  else if(isBlackLeft()){
+    setVelocidadeStop();
+    //enquanto o sensor esquerdo não encontrar a linha preta
+    while(!isBlackRight()){ 
+      vireDireitaParado();
       }
-    //caso o sensor esquerdo esteja em cima da linha preta  
-    else if(isBlackLeft()){
-      setVelocidadeStop();
-      //enquanto o sensor esquerdo não encontrar a linha preta
-      while(!isBlackRight()){ 
-        vireDireitaParado();
-      }
-      andar=true;
-      }
-    else if(andar){
-      seguirFrente();
-    }  
+    andar=true;
+  }
+  else if(andar){
+    seguirFrente();
+  }  
 }
